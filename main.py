@@ -4,16 +4,24 @@ from use_cases.use_case import Configuration
 from scrapers.scraper_repository_impl import ScraperRepositoryImpl
 from config.webdriver_config import WebDriverConfig
 from concurrent.futures import ThreadPoolExecutor
+from .scraper_executor import ScraperExecutor
 
 def main():
-    driver = WebDriverConfig().get_driver()
+    scrap_executor = ScraperExecutor()
     
     configuration = Configuration(ThreadPoolExecutor())
-    scraperRepository = ScraperRepositoryImpl(driver)
-    useCase = GetDataUseCase(configuration, scraperRepository)
-    startScrap = StartScrap(configuration, scraperRepository)
+    scraperRepository = ScraperRepositoryImpl(scrap_executor.driver)
     
-    startScrap.execute(StartScrap.Request("https://br.investing.com/crypto"))
+    # getData = GetDataUseCase(configuration, scraperRepository)
+    scrap_executor.add_use_case(
+        use_case=StartScrap(configuration, scraperRepository),
+        use_case_request=StartScrap.Request("https://br.investing.com/crypto")
+    )
+    
+    scrap_executor.execute()
+    
+    
+    # startScrap.execute(StartScrap.Request("https://br.investing.com/crypto"))
     # useCase.execute(GetDataUseCase.Request("https://br.investing.com/crypto"))
 
 if __name__ == "__main__":
